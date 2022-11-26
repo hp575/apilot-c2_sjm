@@ -16,9 +16,9 @@ from selfdrive.controls.lib.vehicle_model import ACCELERATION_DUE_TO_GRAVITY
 HISTORY = 5  # secs
 POINTS_PER_BUCKET = 1500
 MIN_POINTS_TOTAL = 4000
-MIN_POINTS_TOTAL_QLOG = 800
+MIN_POINTS_TOTAL_QLOG = 600
 FIT_POINTS_TOTAL = 2000
-FIT_POINTS_TOTAL_QLOG = 800
+FIT_POINTS_TOTAL_QLOG = 600
 MIN_VEL = 15  # m/s
 FRICTION_FACTOR = 1.5  # ~85% of data coverage
 FACTOR_SANITY = 0.3
@@ -34,6 +34,8 @@ MAX_INVALID_THRESHOLD = 10
 MIN_ENGAGE_BUFFER = 2  # secs
 
 VERSION = 1  # bump this to invalidate old parameter caches
+ALLOWED_CARS = ['toyota', 'hyundai']
+
 
 def slope2rot(slope):
   sin = np.sqrt(slope**2 / (slope**2 + 1))
@@ -94,7 +96,6 @@ class TorqueEstimator:
   def __init__(self, CP, decimated=False):
     self.hist_len = int(HISTORY / DT_MDL)
     self.lag = CP.steerActuatorDelay + .2   # from controlsd
-
     if decimated:
       self.min_bucket_points = MIN_BUCKET_POINTS / 10
       self.min_points_total = MIN_POINTS_TOTAL_QLOG
@@ -107,6 +108,7 @@ class TorqueEstimator:
     self.offline_friction = 0.0
     self.offline_latAccelFactor = 0.0
     self.resets = 0.0
+    self.use_params = CP.carName in ALLOWED_CARS
 
     if CP.lateralTuning.which() == 'torque':
       self.offline_friction = CP.lateralTuning.torque.friction
@@ -220,7 +222,7 @@ class TorqueEstimator:
     msg.valid = valid
     liveTorqueParameters = msg.liveTorqueParameters
     liveTorqueParameters.version = VERSION
-    #liveTorqueParameters.useParams = self.use_params
+    liveTorqueParameters.useParams = self.use_params
 
     if self.filtered_points.is_valid():
       latAccelFactor, latAccelOffset, friction_coeff = self.estimate_params()
@@ -298,6 +300,7 @@ def main(sm=None, pm=None):
     # 4Hz driven by liveLocationKalman
     if sm.frame % 5 == 0:
       pm.send('liveTorqueParameters', estimator.get_msg(valid=sm.all_checks()))
+
 
 if __name__ == "__main__":
   main()
