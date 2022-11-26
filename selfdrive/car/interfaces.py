@@ -310,11 +310,6 @@ class CarInterfaceBase(ABC):
         #events.add(EventName.pcmDisable)  #ajouatom: MAD모드 구현시 이것만 코멘트하면 됨.
         pass
 
-    # 자동인게이지 장푸 버젼 engage when vEgo above 9.375(15kmh)
-    if cs_out.cruiseState.enabled:
-      if cs_out.gearShifter == GearShifter.drive and cs_out.vEgo > 4.166667:  #9.375:
-        events.add(EventName.pcmEnable)
-      
     return events
 
 
