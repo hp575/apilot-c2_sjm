@@ -366,6 +366,7 @@ class Android(HardwareBase):
     return self.read_param_file("/sys/class/power_supply/battery/charge_type", lambda x: x.strip() != "N/A", True)
 
   def set_battery_charging(self, on):
+    print('set_battery_charging=', on)
     with open('/sys/class/power_supply/battery/charging_enabled', 'w') as f:
       f.write(f"{1 if on else 0}\n")
 
