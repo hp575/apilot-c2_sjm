@@ -253,6 +253,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "TFollowRatio", PERSISTENT },
     { "JerkUpperLowerLimit", PERSISTENT },        
     {"OPKRTimeZone", PERSISTENT},
+    { "KeepEngage", PERSISTENT },
 };
 
 } // namespace
