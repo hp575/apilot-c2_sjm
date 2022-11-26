@@ -879,7 +879,7 @@ TimeZoneSelectCombo::TimeZoneSelectCombo() : AbstractControl("TZ", "", "../asset
 
   QObject::connect(&btn, &QPushButton::clicked, [=]() {
     if (btn.text() == tr("UNSET")) {
-      if (ConfirmationDialog::confirm(tr("Do you want to set default?"), this)) {
+      if (ConfirmationDialog::confirm(tr("Do you want to set default?"), tr("Reboot"), this)) {
         params.put("OPKRTimeZone", "UTC");
         combobox.setCurrentIndex(0);
         refresh();
@@ -897,7 +897,7 @@ TimeZoneSelectCombo::TimeZoneSelectCombo() : AbstractControl("TZ", "", "../asset
     combobox.itemData(combobox.currentIndex());
     QString str = combobox.currentText();
     if (combobox.currentIndex() != 0) {
-      if (ConfirmationDialog::confirm(tr("Press OK to set your timezone as") + "\n" + str, this)) {
+      if (ConfirmationDialog::confirm(tr("Press OK to set your timezone as") + "\n" + str, tr("Reboot"), this)) {
         params.put("OPKRTimeZone", str.toStdString());
       }
     }
