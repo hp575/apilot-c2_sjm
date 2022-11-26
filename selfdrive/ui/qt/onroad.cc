@@ -1196,7 +1196,7 @@ void AnnotatedCameraWidget::drawDeviceState(QPainter &p) {
   configFont(p, "Inter", 25, "Bold");
   rect = QRect(x, y, w, w);
   p.setPen(QColor(255, 255, 255, 200));
-  p.drawText(rect, Qt::AlignCenter, "STORAGE");
+  p.drawText(rect, Qt::AlignCenter, "BATTERY");
 
   y += 80;
   configFont(p, "Inter", 50, "Bold");
