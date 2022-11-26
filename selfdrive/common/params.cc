@@ -252,6 +252,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "SccConnectedBus2", PERSISTENT },
     { "TFollowRatio", PERSISTENT },
     { "JerkUpperLowerLimit", PERSISTENT },        
+    {"OPKRTimeZone", PERSISTENT},
 };
 
 } // namespace

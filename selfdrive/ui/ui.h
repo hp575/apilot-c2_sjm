@@ -15,7 +15,7 @@
 #include "selfdrive/common/params.h"
 #include "selfdrive/common/timing.h"
 
-const int bdr_s = 30;
+const int bdr_s = 20;
 const int header_h = 420;
 const int footer_h = 280;
 

@@ -34,6 +34,11 @@
 #include <QListView>
 #include <QListWidget>
 
+#include <QProcess> // opkr
+#include <QDateTime> // opkr
+#include <QTimer> // opkr
+#include <QFileInfo> // opkr
+
 TogglesPanel::TogglesPanel(SettingsWindow *parent) : ListWidget(parent) {
   // param, title, desc, icon, confirm
   std::vector<std::tuple<QString, QString, QString, QString>> toggle_defs{
@@ -561,19 +566,19 @@ SettingsWindow::SettingsWindow(QWidget *parent) : QFrame(parent) {
       panel_widget->setCurrentWidget(w);
     });
   }
-  sidebar_layout->setContentsMargins(50, 50, 100, 50);
+  sidebar_layout->setContentsMargins(5, 50, 10, 50);
 
   // main settings layout, sidebar + main panel
   QHBoxLayout *main_layout = new QHBoxLayout(this);
 
-  sidebar_widget->setFixedWidth(500);
+  sidebar_widget->setFixedWidth(320);
   main_layout->addWidget(sidebar_widget);
   main_layout->addWidget(panel_widget);
 
   setStyleSheet(R"(
     * {
       color: white;
-      font-size: 40px;
+      font-size: 50px;
     }
     SettingsWindow {
       background-color: black;
@@ -674,6 +679,8 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
   toggleLayout->addWidget(new CValueControl("LongControlActiveSound", "크루즈 소리 0:OFF,1:Half, 2:ON", "크루즈 소리를 켭니다.", "../assets/offroad/icon_road.png", 0, 2, 1));
   toggleLayout->addWidget(new ParamControl("CustomMapbox", "CustomMapBox입력", "http://IP주소:8082 에 접속하여 mapbox token을 입력하면 자동으로 켜집니다. 끄면, 초기화됩니다.", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(new ParamControl("ShowDebugUI", "Show Debug UI", "", "../assets/offroad/icon_shell.png", this));
+  toggleLayout->addWidget(new TimeZoneSelectCombo());
+
 }
 
 TuningPanel::TuningPanel(QWidget* parent) : QWidget(parent) {
@@ -830,6 +837,86 @@ CValueControl::CValueControl(const QString& params, const QString& title, const 
         refresh();
     });
     refresh();
+}
+TimeZoneSelectCombo::TimeZoneSelectCombo() : AbstractControl("TZ", "", "../assets/offroad/icon_shell.png") 
+{
+  combobox.setStyleSheet(R"(
+    subcontrol-origin: padding;
+    subcontrol-position: top left;
+    selection-background-color: #111;
+    selection-color: yellow;
+    color: white;
+    background-color: #393939;
+    border-style: solid;
+    border: 0px solid #1e1e1e;
+    border-radius: 0;
+    width: 100px;
+  )");
+
+  combobox.addItem(tr("Select Your TimeZone"));
+  QFile timezonelistfile("/data/openpilot/selfdrive/assets/addon/param/TimeZone");
+  if (timezonelistfile.open(QIODevice::ReadOnly)) {
+    QTextStream timezonename(&timezonelistfile);
+    while (!timezonename.atEnd()) {
+      QString line = timezonename.readLine();
+      combobox.addItem(line);
+    }
+    timezonelistfile.close();
+  }
+
+  combobox.setFixedWidth(950);
+
+  btn.setStyleSheet(R"(
+    padding: 0;
+    border-radius: 50px;
+    font-size: 35px;
+    font-weight: 500;
+    color: #E4E4E4;
+    background-color: #393939;
+  )");
+
+  btn.setFixedSize(150, 100);
+
+  QObject::connect(&btn, &QPushButton::clicked, [=]() {
+    if (btn.text() == tr("UNSET")) {
+      if (ConfirmationDialog::confirm(tr("Do you want to set default?"), this)) {
+        params.put("OPKRTimeZone", "UTC");
+        combobox.setCurrentIndex(0);
+        refresh();
+      }
+    }
+  });
+
+  //combobox.view()->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+
+  hlayout->addWidget(&combobox, Qt::AlignLeft);
+  hlayout->addWidget(&btn, Qt::AlignRight);
+
+  QObject::connect(&combobox, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), [=](int index)
+  {
+    combobox.itemData(combobox.currentIndex());
+    QString str = combobox.currentText();
+    if (combobox.currentIndex() != 0) {
+      if (ConfirmationDialog::confirm(tr("Press OK to set your timezone as") + "\n" + str, this)) {
+        params.put("OPKRTimeZone", str.toStdString());
+      }
+    }
+    refresh();
+  });
+  refresh();
+}
+
+void TimeZoneSelectCombo::refresh() {
+  QString selected_timezonename = QString::fromStdString(params.get("OPKRTimeZone"));
+  int index = combobox.findText(selected_timezonename);
+  if (index >= 0) combobox.setCurrentIndex(index);
+  if (selected_timezonename.length()) {
+    btn.setEnabled(true);
+    btn.setText(tr("UNSET"));
+  } else {
+    btn.setEnabled(false);
+    btn.setText(tr("SET"));
+  }
 }
 
 void CValueControl::refresh()
