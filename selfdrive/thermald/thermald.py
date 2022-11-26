@@ -213,7 +213,7 @@ def thermald_thread(end_event, hw_queue):
   hotspot_run = False
 
   hotspot_on_boot = False #ntune_option_enabled('OpkrHotspotOnBoot')
-  battery_charging_control = False #ntune_option_enabled('batteryChargingControl')
+  battery_charging_control = True #ntune_option_enabled('batteryChargingControl')
   battery_charging_min = 70 #int(ntune_option_get('batteryChargingMin'))
   battery_charging_max = 80 #int(ntune_option_get('batteryChargingMax'))
 
