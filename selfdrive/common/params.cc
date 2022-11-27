@@ -254,6 +254,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "JerkUpperLowerLimit", PERSISTENT },        
     {"OPKRTimeZone", PERSISTENT},
     { "KeepEngage", PERSISTENT },
+    { "UseLanelines", PERSISTENT },
 };
 
 } // namespace
