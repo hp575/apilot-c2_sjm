@@ -71,6 +71,24 @@ class LanePlanner:
     l_prob *= l_std_mod
     r_prob *= r_std_mod
 
+    if ENABLE_ZORROBYTE:
+      # zorrobyte code
+      if l_prob > 0.5 and r_prob > 0.5:
+        self.frame += 1
+        if self.frame > 20:
+          self.frame = 0
+          current_lane_width = clip(abs(self.rll_y[0] - self.lll_y[0]), 2.5, 3.5)
+          self.readings.append(current_lane_width)
+          self.lane_width = mean(self.readings)
+          if len(self.readings) >= 30:
+            self.readings.pop(0)
+
+      # zorrobyte
+      # Don't exit dive
+      if abs(self.rll_y[0] - self.lll_y[0]) > self.lane_width:
+        r_prob = r_prob / interp(l_prob, [0, 1], [1, 3])
+
+    else:
       # Find current lanewidth
       self.lane_width_certainty.update(l_prob * r_prob)
       current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
