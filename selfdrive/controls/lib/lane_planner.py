@@ -1,29 +1,16 @@
 import numpy as np
 from cereal import log
 from common.filter_simple import FirstOrderFilter
-from common.numpy_fast import interp
+from common.numpy_fast import interp, clip, mean
 from common.realtime import DT_MDL
-from selfdrive.hardware import EON, TICI
-from selfdrive.swaglog import cloudlog
-
 
 TRAJECTORY_SIZE = 33
-# camera offset is meters from center car to camera
-# model path is in the frame of EON's camera. TICI is 0.1 m away,
-# however the average measured path difference is 0.04 m
-if EON:
-  CAMERA_OFFSET = -0.06
-  PATH_OFFSET = 0.0
-elif TICI:
-  CAMERA_OFFSET = 0.04
-  PATH_OFFSET = 0.04
-else:
-  CAMERA_OFFSET = 0.0
-  PATH_OFFSET = 0.0
+
+ENABLE_ZORROBYTE = True
 
 
 class LanePlanner:
-  def __init__(self, wide_camera=False):
+  def __init__(self,):
     self.ll_t = np.zeros((TRAJECTORY_SIZE,))
     self.ll_x = np.zeros((TRAJECTORY_SIZE,))
     self.lll_y = np.zeros((TRAJECTORY_SIZE,))
@@ -42,8 +29,10 @@ class LanePlanner:
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
 
-    self.camera_offset = -CAMERA_OFFSET if wide_camera else CAMERA_OFFSET
-    self.path_offset = -PATH_OFFSET if wide_camera else PATH_OFFSET
+    self.camera_offset = 0.0
+
+    self.readings = []
+    self.frame = 0
 
   def parse_model(self, md):
     lane_lines = md.laneLines
@@ -66,7 +55,6 @@ class LanePlanner:
   def get_d_path(self, v_ego, path_t, path_xyz):
     # Reduce reliance on lanelines that are too far apart or
     # will be in a few seconds
-    path_xyz[:, 1] += self.path_offset
     l_prob, r_prob = self.lll_prob, self.rll_prob
     width_pts = self.rll_y - self.lll_y
     prob_mods = []
@@ -83,24 +71,45 @@ class LanePlanner:
     l_prob *= l_std_mod
     r_prob *= r_std_mod
 
-    # Find current lanewidth
-    self.lane_width_certainty.update(l_prob * r_prob)
-    current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
-    self.lane_width_estimate.update(current_lane_width)
-    speed_lane_width = interp(v_ego, [0., 31.], [2.8, 3.5])
-    self.lane_width = self.lane_width_certainty.x * self.lane_width_estimate.x + \
-                      (1 - self.lane_width_certainty.x) * speed_lane_width
+    if ENABLE_ZORROBYTE:
+      # zorrobyte code
+      if l_prob > 0.5 and r_prob > 0.5:
+        self.frame += 1
+        if self.frame > 20:
+          self.frame = 0
+          current_lane_width = clip(abs(self.rll_y[0] - self.lll_y[0]), 2.5, 3.5)
+          self.readings.append(current_lane_width)
+          self.lane_width = mean(self.readings)
+          if len(self.readings) >= 30:
+            self.readings.pop(0)
+
+      # zorrobyte
+      # Don't exit dive
+      if abs(self.rll_y[0] - self.lll_y[0]) > self.lane_width:
+        r_prob = r_prob / interp(l_prob, [0, 1], [1, 3])
+
+    else:
+      # Find current lanewidth
+      self.lane_width_certainty.update(l_prob * r_prob)
+      current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
+      self.lane_width_estimate.update(current_lane_width)
+      speed_lane_width = interp(v_ego, [0., 31.], [2.8, 3.5])
+      self.lane_width = self.lane_width_certainty.x * self.lane_width_estimate.x + \
+                        (1 - self.lane_width_certainty.x) * speed_lane_width
 
     clipped_lane_width = min(4.0, self.lane_width)
     path_from_left_lane = self.lll_y + clipped_lane_width / 2.0
     path_from_right_lane = self.rll_y - clipped_lane_width / 2.0
 
     self.d_prob = l_prob + r_prob - l_prob * r_prob
+
+    # neokii
+    if self.d_prob > 0.65:
+      self.d_prob = min(self.d_prob * 1.3, 1.0)
+
     lane_path_y = (l_prob * path_from_left_lane + r_prob * path_from_right_lane) / (l_prob + r_prob + 0.0001)
     safe_idxs = np.isfinite(self.ll_t)
     if safe_idxs[0]:
       lane_path_y_interp = np.interp(path_t, self.ll_t[safe_idxs], lane_path_y[safe_idxs])
       path_xyz[:,1] = self.d_prob * lane_path_y_interp + (1.0 - self.d_prob) * path_xyz[:,1]
-    else:
-      cloudlog.warning("Lateral mpc - NaNs in laneline times, ignoring")
     return path_xyz
