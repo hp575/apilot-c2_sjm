@@ -44,7 +44,8 @@ def manager_init() -> None:
     ("HasAcceptedTerms", "0"),
     ("LanguageSetting", "main_en"),
     ("OpenpilotEnabledToggle", "1"),
-    ("ShowDebugUI", "0"),
+    ("ShowDebugUI", "1"),
+    ("ShowDateTime", "1"),
     ("AutoResumeFromGas", "1"),
     ("AutoResumeFromGasSpeed", "30"),
     ("AutoResumeFromGasSpeedMode", "1"),    
@@ -57,6 +58,8 @@ def manager_init() -> None:
     ("AutoResumeFromBrakeRelease", "1"),
     ("AutoResumeFromBrakeReleaseDist", "20"),
     ("AutoResumeFromBrakeReleaseLeadCar", "1"),
+    ("AutoResumeFromBrakeCarSpeed", "40"),
+    ("AutoResumeFromBrakeReleaseTrafficSign", "1"),
     ("XEgoObstacleCost", "6"),
     ("JEgoCost", "5"),
     ("AChangeCost", "150"),
@@ -84,11 +87,13 @@ def manager_init() -> None:
     ("LongitudinalTuningKpV", "100"),     
     ("EnableRadarTracks", "0"),      
     ("ApplyDynamicTFollow", "110"), 
+    ("ApplyDynamicTFollowDecel", "110"), 
     ("SccConnectedBus2", "0"),   
     ("TFollowRatio", "100"),
     ("JerkUpperLowerLimit", "8"),    
     ("KeepEngage", "1"),
     ("UseLanelines", "0"),    
+    ("PathOffset", "0"),        
   ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))

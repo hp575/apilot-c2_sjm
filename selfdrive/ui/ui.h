@@ -138,6 +138,7 @@ public:
   QTransform car_space_transform;
   bool wide_camera;
   bool show_debug = false;
+  bool show_datetime = false;
 
 signals:
   void uiUpdate(const UIState &s);

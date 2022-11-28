@@ -87,6 +87,8 @@ class CruiseHelper:
     if all or (frame + 200) % 300 == 0:
       self.autoResumeFromBrakeReleaseDist = float(int(Params().get("AutoResumeFromBrakeReleaseDist", encoding="utf8")))
       self.autoResumeFromBrakeReleaseLeadCar = Params().get_bool("AutoResumeFromBrakeReleaseLeadCar")
+      self.autoResumeFromBrakeCarSpeed = float(int(Params().get("AutoResumeFromBrakeCarSpeed", encoding="utf8")))
+      self.autoResumeFromBrakeReleaseTrafficSign  = Params().get_bool("AutoResumeFromBrakeReleaseTrafficSign")
       self.longControlActiveSound = int(Params().get("LongControlActiveSound"))
       self.accelLimitEcoSpeed = float(int(Params().get("AccelLimitEcoSpeed", encoding="utf8")))
       self.autoSpeedUptoRoadSpeedLimit = float(int(Params().get("AutoSpeedUptoRoadSpeedLimit", encoding="utf8"))) / 100.
@@ -94,7 +96,7 @@ class CruiseHelper:
       self.autoSpeedAdjustWithLeadCar = float(int(Params().get("AutoSpeedAdjustWithLeadCar", encoding="utf8"))) / 1.
       self.cruiseButtonMode = int(Params().get("CruiseButtonMode"))
       self.autoResumeFromGasSpeedMode = int(Params().get("AutoResumeFromGasSpeedMode"))
-      
+
   @staticmethod
   def get_lead(sm):
 
@@ -169,7 +171,7 @@ class CruiseHelper:
 
   def cruise_control(self, controls, CS, active_mode=0):  #active_mode => -3(OFF auto), -2(OFF brake), -1(OFF user), 0(OFF), 1(ON user), 2(ON gas), 3(ON auto)
     if controls.enabled:
-      if active_mode > 0 and controls.longGearShifter:
+      if active_mode > 0 and controls.CC.longEnabled:
         if self.longActiveUser <= 0:
           controls.LoC.reset(v_pid=CS.vEgo)
         if self.longControlActiveSound >= 2 and self.longActiveUser != active_mode:
@@ -386,21 +388,21 @@ class CruiseHelper:
             if self.gasPressedCount * DT_CTRL < 0.6 and v_ego_kph_set > 30.0:  #1초이내에 Gas페달을 잡았다가 놓으면...
               v_cruise_kph = self.v_cruise_speed_up(v_cruise_kph, roadSpeed)
 
-      elif not CS.brakePressed and self.preBrakePressed and self.autoResumeFromBrakeRelease:
-        if resume_cond and v_ego_kph > 3.0 and self.autoResumeFromBrakeReleaseDist < dRel:
-          v_cruise_kph = v_ego_kph_set  # 현재속도로 세트~
+      elif not CS.brakePressed and self.preBrakePressed:
+        if v_ego_kph < 5.0 and xState == "SOFT_HOLD":
           self.cruise_control(controls, CS, 3)
-        elif v_ego_kph < 5.0 and xState == "SOFT_HOLD":
-          #v_cruise_kph = v_ego_kph_set  # e2e오류이므로 일단 현재속도로 세트~
-          self.cruise_control(controls, CS, 3)
-        elif v_ego_kph < 60.0 and xState == "E2E_STOP" and self.position_y > 5.0 and abs(self.position_y) < 3.0:
-          v_cruise_kph = v_ego_kph_set  
-          self.cruise_control(controls, CS, 3)
-        elif v_ego_kph >= 40.0 and dRel==0:
-          v_cruise_kph = v_ego_kph_set
-          self.cruise_control(controls, CS, 3)
-        elif v_ego_kph < 1.0 and 2 < dRel < 10 and self.autoResumeFromBrakeReleaseLeadCar:
-          self.cruise_control(controls, CS, 3)
+        elif self.autoResumeFromBrakeRelease: # 브레이크 해제에 대한 크루즈 ON
+          if resume_cond and v_ego_kph > 1.0 and self.autoResumeFromBrakeReleaseDist < dRel and self.autoResumeFromBrakeReleaseDist > 0:
+            v_cruise_kph = v_ego_kph_set  # 현재속도로 세트~
+            self.cruise_control(controls, CS, 3)
+          elif v_ego_kph < 60.0 and xState == "E2E_STOP" and self.position_y > 5.0 and abs(self.position_y) < 3.0 and self.autoResumeFromBrakeReleaseTrafficSign:
+            v_cruise_kph = v_ego_kph_set  
+            self.cruise_control(controls, CS, 3)
+          elif dRel==0 and v_ego_kph >= self.autoResumeFromBrakeCarSpeed and self.autoResumeFromBrakeCarSpeed > 0:
+            v_cruise_kph = v_ego_kph_set
+            self.cruise_control(controls, CS, 3)
+          elif v_ego_kph < 1.0 and 2 < dRel < 10 and self.autoResumeFromBrakeReleaseLeadCar:
+            self.cruise_control(controls, CS, 3)
       elif self.userCruisePaused:
         if v_ego_kph > 3.0 and dRel > 0 and vRel < 0:          
           v_cruise_kph = v_ego_kph_set
