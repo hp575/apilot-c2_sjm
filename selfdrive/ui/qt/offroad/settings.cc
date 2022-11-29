@@ -675,12 +675,15 @@ CommunityPanel::CommunityPanel(QWidget* parent) : QWidget(parent) {
 
   toggleLayout->addWidget(horizontal_line());
   toggleLayout->addWidget(new ParamControl("AutoNaviSpeedCtrl", "NDA 지원", "별도의 단말기에 NDA Manager를 설치하고 같은 네트웍에 물리고 Tmap을 실행하세요", "../assets/offroad/icon_road.png", this));
-  toggleLayout->addWidget(new CValueControl("AutoRoadLimitCtrl", "NDA: 속도제한(0:None,1:Limit,2:Apply)", "Limit: 속도를 제한합니다. Apply: 제한속도로 실시간 적용합니다.", "../assets/offroad/icon_road.png", 0, 2, 1));
+  //toggleLayout->addWidget(new CValueControl("AutoRoadLimitCtrl", "NDA: 속도제한(0:None,1:Limit,2:Apply)", "Limit: 속도를 제한합니다. Apply: 제한속도로 실시간 적용합니다.", "../assets/offroad/icon_road.png", 0, 2, 1));
   toggleLayout->addWidget(new CValueControl("LongControlActiveSound", "크루즈 소리 0:OFF,1:Half, 2:ON", "크루즈 소리를 켭니다.", "../assets/offroad/icon_road.png", 0, 2, 1));
   toggleLayout->addWidget(new ParamControl("CustomMapbox", "CustomMapBox입력", "http://IP주소:8082 에 접속하여 mapbox token을 입력하면 자동으로 켜집니다. 끄면, 초기화됩니다.", "../assets/offroad/icon_road.png", this));
   toggleLayout->addWidget(new ParamControl("ShowDebugUI", "Show Debug UI", "", "../assets/offroad/icon_shell.png", this));
+  toggleLayout->addWidget(new ParamControl("ShowDateTime", "시간정보표시", "", "../assets/offroad/icon_shell.png", this));
   toggleLayout->addWidget(new TimeZoneSelectCombo());
-
+  toggleLayout->addWidget(new ParamControl("KeepEngage", "인게이지 유지모드", "", "../assets/offroad/icon_shell.png", this));
+  toggleLayout->addWidget(new ParamControl("UseLanelines", "레인모드사용", "", "../assets/offroad/icon_road.png", this));
+  toggleLayout->addWidget(new CValueControl("PathOffset", "차선치우침 좌우보정", "+가우측인지 좌측인지 모르겠네용~", "../assets/offroad/icon_road.png", -200, 200, 1));
 }
 
 TuningPanel::TuningPanel(QWidget* parent) : QWidget(parent) {
@@ -706,32 +709,33 @@ TuningPanel::TuningPanel(QWidget* parent) : QWidget(parent) {
     toggleLayout->addWidget(new CValueControl("StopDistance", "StopDistance(600cm)", "선행차와 정지하는 거리를 입력합니다.", "../assets/offroad/icon_road.png", 200, 1000, 50));
     toggleLayout->addWidget(new CValueControl("TrafficStopDistanceAdjust", "신호정지 위치 조정(200cm)", "+값으로 하면 정지선에 다가갑니다.", "../assets/offroad/icon_road.png", -1000, 1000, 10));
     toggleLayout->addWidget(horizontal_line());
-    toggleLayout->addWidget(new CValueControl("JerkUpperLowerLimit", "롱컨: JERK값(10)", "값이 커지면 가감속반응이 빨라지지만, 기분이 안좋음.", "../assets/offroad/icon_road.png", 5, 50, 1));
+    toggleLayout->addWidget(new CValueControl("JerkUpperLowerLimit", "롱컨: JERK값(8)", "값이 커지면 가감속반응이 빨라지지만, 기분이 안좋음.", "../assets/offroad/icon_road.png", 5, 50, 1));
     
     //toggleLayout->addWidget(new CValueControl("LongitudinalActuatorDelayUpperBound", "ActuatorDelayUpperBound(0.5*100%)", "", "../assets/offroad/icon_road.png", 10, 200, 1));
     //toggleLayout->addWidget(new CValueControl("LongitudinalActuatorDelayLowerBound", "ActuatorDelayLowerBound(0.5*100%)", "", "../assets/offroad/icon_road.png", 10, 200, 1));
-    toggleLayout->addWidget(new CValueControl("LongitudinalTuningKf", "롱컨: FF게인(100%)", "(시험용) ACCEL을 좀 더 강력하게 적용합니다.", "../assets/offroad/icon_road.png", 100, 120, 1));
-    toggleLayout->addWidget(new CValueControl("LongitudinalTuningKpV", "롱컨: P게인(50)", "(시험용) ", "../assets/offroad/icon_road.png", 50, 150, 1));
+    toggleLayout->addWidget(new CValueControl("LongitudinalTuningKf", "롱컨: FF게인(110%)", "(시험용) ACCEL을 좀 더 강력하게 적용합니다.", "../assets/offroad/icon_road.png", 100, 120, 1));
+    toggleLayout->addWidget(new CValueControl("LongitudinalTuningKpV", "롱컨: P게인(100)", "(시험용) ", "../assets/offroad/icon_road.png", 50, 150, 1));
     toggleLayout->addWidget(horizontal_line());
-    toggleLayout->addWidget(new CValueControl("XEgoObstacleCost", "X_EGO_COST(3)", "증가할수록 정지선정지가 정확해지나, 급감속이 강해집니다.", "../assets/offroad/icon_road.png", 3, 50, 1));
+    toggleLayout->addWidget(new CValueControl("XEgoObstacleCost", "X_EGO_COST(5)", "증가할수록 정지선정지가 정확해지나, 급감속이 강해집니다.", "../assets/offroad/icon_road.png", 3, 50, 1));
     toggleLayout->addWidget(new CValueControl("JEgoCost", "J_EGO_COST(5)", "", "../assets/offroad/icon_road.png", 4, 10, 1));
-    toggleLayout->addWidget(new CValueControl("AChangeCost", "A_CHANGE_COST(100)", "적으면 선행차에 대한 반응이 강해집니다. ", "../assets/offroad/icon_road.png", 20, 400, 10));
+    toggleLayout->addWidget(new CValueControl("AChangeCost", "A_CHANGE_COST(150)", "적으면 선행차에 대한 반응이 강해집니다. ", "../assets/offroad/icon_road.png", 20, 400, 10));
     toggleLayout->addWidget(new CValueControl("DangerZoneCost", "DANGER_ZONE_COST(100)", "", "../assets/offroad/icon_road.png", 0, 400, 10));
     toggleLayout->addWidget(new ParamControl("ApplyLongDynamicCost", "차량간격유지 동적제어(OFF)", "전방차량의 간격을 최대한 유지하도록 응답속도가 빨라집니다.", "../assets/offroad/icon_road.png", this));
-    toggleLayout->addWidget(new CValueControl("ApplyDynamicTFollow", "차량간격동적제어(105%)", "선행차와의 상대속도에 의해 차량간격을 동적으로 제어합니다. 점점가까와지면 점점 멀리~", "../assets/offroad/icon_road.png", 100, 150, 1));
+    toggleLayout->addWidget(new CValueControl("ApplyDynamicTFollow", "차량간격동적제어:상대속도(110%)", "선행차와의 상대속도에 의해 차량간격을 동적으로 제어합니다. 점점가까와지면 점점 멀리~", "../assets/offroad/icon_road.png", 100, 150, 1));
+    toggleLayout->addWidget(new CValueControl("ApplyDynamicTFollowDecel", "차량간격동적제어:감속(110%)", "차량의 감속도에 따라 차량간격을 동적으로 제어합니다. 감속이 급하면 급할수록 점점 멀리~", "../assets/offroad/icon_road.png", 100, 150, 1));
     toggleLayout->addWidget(new CValueControl("TFollowRatio", "위험:차량간격비율(100%)", "선행차와의 간격을 조정합니다. 100%이하로 하면 매우 위험합니다.", "../assets/offroad/icon_road.png", 70, 120, 1));
     
     toggleLayout->addWidget(horizontal_line());
     toggleLayout->addWidget(new CValueControl("TrafficStopAccel", "신호정지 감속율 (80%)", "신호를 만나면 서서히 감속하여 정지합니다.", "../assets/offroad/icon_road.png", 10, 120, 10));
     //toggleLayout->addWidget(new ParamControl("TrafficStopModelSpeed", "신호정지 모델속도(OFF)", "신호정지시 모델에서 제공하는 속도를 따름니다.", "../assets/offroad/icon_road.png", this));
-    toggleLayout->addWidget(new CValueControl("E2eDecelSpeed", "모델의 자동속도조절의 적용속도(90Km/h)", "지정속도 이하에서는 모델이 제공하는 속도를 적용합니다. 0: 적용안함.", "../assets/offroad/icon_road.png", 0, 120, 10));
+    toggleLayout->addWidget(new CValueControl("E2eDecelSpeed", "모델의 자동속도 적용(90)", "지정속도 이하에서는 모델이 제공하는 속도를 적용합니다. 0: 적용안함.", "../assets/offroad/icon_road.png", 0, 120, 10));
     toggleLayout->addWidget(horizontal_line());
     toggleLayout->addWidget(new CValueControl("AccelLimitEcoSpeed", "초기가속제한 속도(3km/h)", "지정속도까지 가속도를 제한합니다. 출발시 충격 방지!!", "../assets/offroad/icon_road.png", 0, 100, 1));
     toggleLayout->addWidget(new ParamControl("AccelLimitConfusedModel", "모델혼잡시 조향가속비율적용(ON)", "E2E모드에서 모델예측이 20M이내인경우 가속을 제한합니다.", "../assets/offroad/icon_road.png", this));
     toggleLayout->addWidget(new CValueControl("AccelBoost", "가속도 제어(100%)", "가속도를 제어합니다. 크루즈갭:3일 때 만 적용됨 ", "../assets/offroad/icon_road.png", 50, 200, 10));
     toggleLayout->addWidget(horizontal_line());
     toggleLayout->addWidget(new ParamControl("AutoCurveSpeedCtrl", "모델커브속도조절(ON)", "곡선도로를 만나면 속도를 줄여줍니다.", "../assets/offroad/icon_road.png", this));
-    toggleLayout->addWidget(new CValueControl("AutoCurveSpeedFactor", "모델커브속도조절비율(100%)", "커브속도조절", "../assets/offroad/icon_road.png", 50, 150, 1));
+    //toggleLayout->addWidget(new CValueControl("AutoCurveSpeedFactor", "모델커브속도조절비율(100%)", "커브속도조절", "../assets/offroad/icon_road.png", 50, 150, 1));
 
 }
 CruisePanel::CruisePanel(QWidget* parent) : QWidget(parent) {
@@ -756,16 +760,19 @@ CruisePanel::CruisePanel(QWidget* parent) : QWidget(parent) {
     // 크루즈
     toggleLayout->addWidget(new ParamControl("AutoSyncCruiseSpeed", "가속시 크루즈속도를 맞춤", "가속시 주행속도가 크루즈 속도보다 높아지면 맞춰줍니다.", "../assets/offroad/icon_road.png", this));
     toggleLayout->addWidget(new CValueControl("AutoSpeedUptoRoadSpeedLimit", "자동속도증가모드 (100%)", "전방차량의 속도가 빨라지면 RoadSpeedLimit까지 속도를 올립니다.", "../assets/offroad/icon_road.png", 0, 200, 10));
-    toggleLayout->addWidget(new CValueControl("AutoSpeedAdjustWithLeadCar", "선행차속도에 크루즈속도맞추기(+40km/h)", "선행차량의 속도에 옵셋속도를 더한 속도를 설정합니다.", "../assets/offroad/icon_road.png", 0, 100, 5));
+    toggleLayout->addWidget(new CValueControl("AutoSpeedAdjustWithLeadCar", "선행차에 크루즈속도맞춤(+40)", "불필요한 기능, 선행차량의 속도에 옵셋속도를 더한 속도를 설정합니다.", "../assets/offroad/icon_road.png", 0, 100, 5));
     toggleLayout->addWidget(new CValueControl("InitMyDrivingMode", "드라이브모드 초기값(3)", "1:연비모드,2:관성제어모드,3:일반주행모드,4:고속모드(신호무시)", "../assets/offroad/icon_road.png", 1, 4, 1));
     toggleLayout->addWidget(new CValueControl("CruiseButtonMode", "크루즈버튼작동모드", "0:일반속도제어,1:사용자속도제어1, 2:사용자속도제어2", "../assets/offroad/icon_road.png", 0, 2, 1));
     toggleLayout->addWidget(horizontal_line());
-    toggleLayout->addWidget(new ParamControl("AutoResumeFromGas", "엑셀크루즈ON", "엑셀을 60%이상 밟으면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", this));
-    toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeed", "엑셀크루즈ON:속도", "설정속도이상이 되면 자동으로 크루즈를 켭니다.", "../assets/offroad/icon_road.png", 20, 40, 5));
-    toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeedMode", "엑셀크루즈ON:속도설정방법", "0:현재속도, 1:이전속도, 2: 선행차량이 있을때만 이전속도", "../assets/offroad/icon_road.png", 0, 2, 1));
+    toggleLayout->addWidget(new ParamControl("AutoResumeFromGas", "엑셀 크루즈ON 사용", "엑셀밟으면 크루즈를 켭니다. 60%이상 밟으면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", this));
+    toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeed", "엑셀 크루즈ON:속도", "설정속도이상이 되면 자동으로 크루즈를 켭니다.", "../assets/offroad/icon_road.png", 20, 140, 5));
+    toggleLayout->addWidget(new CValueControl("AutoResumeFromGasSpeedMode", "엑셀 크루즈ON:속도복원설정", "0:현재속도, 1:이전속도, 2: 선행차량이 있을때만 이전속도", "../assets/offroad/icon_road.png", 0, 2, 1));
+    toggleLayout->addWidget(horizontal_line());
     toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeRelease", "브레이크해제 크루즈ON 사용", "브레이크를 떼면 크르즈를 켭니다.", "../assets/offroad/icon_road.png", this));
-    toggleLayout->addWidget(new CValueControl("AutoResumeFromBrakeReleaseDist", "브레이크해제 크루즈ON:선행차거리", "브레이크를 떼고, 선행차가 거리이상이면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", 0, 80, 5));
-    toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeReleaseLeadCar", "브레이크해제 크루즈ON:정지상태,선행차10M이내", "정지상태에서 선행차량이 10M이내이면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", this));
+    toggleLayout->addWidget(new CValueControl("AutoResumeFromBrakeReleaseDist", "브레이크해제 크루즈ON:주행중,선행차", "0:사용안함. 브레이크를 떼고, 선행차가 일정 거리이상이면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", 0, 80, 5));
+    toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeReleaseLeadCar", "브레이크해제 크루즈ON:정지상태,선행차", "정지상태에서 선행차량이 10M이내이면 크루즈를 켭니다.", "../assets/offroad/icon_road.png", this));
+    toggleLayout->addWidget(new CValueControl("AutoResumeFromBrakeCarSpeed", "브레이크해제 크루즈ON:주행중,속도", "0:사용안함. 브레이크를 떼고, 일정속도이상이면 크루즈를 현재 속도로 켭니다.", "../assets/offroad/icon_road.png", 0, 80, 5));
+    toggleLayout->addWidget(new ParamControl("AutoResumeFromBrakeReleaseTrafficSign", "브레이크해제 크루즈ON:주행중,신호", "60Km/h이하에서 브레이크를 떼고 신호가 감지되면 현재속도로 크루즈를 켭니다.", "../assets/offroad/icon_road.png", this));
 
 }
 

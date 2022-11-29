@@ -725,7 +725,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.seatbeltNotLatched: {
-    ET.SOFT_DISABLE: user_soft_disable_alert("Seatbelt Unlatched"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.disengage),
     ET.NO_ENTRY: NoEntryAlert("Seatbelt Unlatched"),
   },
 
@@ -862,13 +862,17 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
   },
 
   EventName.canBusMissing: {
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN Bus Disconnected"),
-    ET.PERMANENT: Alert(
-      "CAN Bus Disconnected: Likely Faulty Cable",
-      "",
-      AlertStatus.normal, AlertSize.small,
-      Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., creation_delay=1.),
-    ET.NO_ENTRY: NoEntryAlert("CAN Bus Disconnected: Check Connections"),
+    #ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN Bus Disconnected"),
+    #ET.PERMANENT: Alert(
+    #  "CAN Bus Disconnected: Likely Faulty Cable",
+    #  "",
+    #  AlertStatus.normal, AlertSize.small,
+    #  Priority.LOW, VisualAlert.none, AudibleAlert.none, 1., creation_delay=1.),
+    #ET.NO_ENTRY: NoEntryAlert("CAN Bus Disconnected: Check Connections"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.disengage),
+    #ET.SOFT_DISABLE: user_soft_disable_alert("Gear not D"),
+    ET.NO_ENTRY: NoEntryAlert("CAN Bus Disconnected"),
+
   },
 
   EventName.steerUnavailable: {
@@ -972,6 +976,20 @@ EVENTS: Dict[int, Dict[str, Union[Alert, AlertCallbackType]]] = {
       "",
       AlertStatus.normal, AlertSize.small,
       Priority.LOW, VisualAlert.none, AudibleAlert.trafficSignChanged, 3.),
+  },
+  EventName.autoHold: {
+    ET.WARNING: Alert(
+      "소프트 오토홀드",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.autoHold, 3.),
+  },
+  EventName.trafficStopping: {
+    ET.WARNING: Alert(
+      "신호 감속정지중입니다.",
+      "",
+      AlertStatus.normal, AlertSize.small,
+      Priority.LOW, VisualAlert.none, AudibleAlert.stopping, 3.),
   },
 
 }

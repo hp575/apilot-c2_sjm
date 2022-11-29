@@ -120,6 +120,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     cruiseResume @117; #ajouatom
     trafficSignGreen @118; #ajouatom
     trafficSignChanged @119; #ajouatom
+    autoHold @120; #ajouatom
+    trafficStopping @121; #ajouatom
     radarCanErrorDEPRECATED @15;
     communityFeatureDisallowedDEPRECATED @62;
     radarCommIssueDEPRECATED @67;
@@ -348,6 +350,10 @@ struct CarControl {
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
   debugTextCC @15 : Text;
+  latEnabled @16: Bool;
+  latOverride @17: Bool;
+  longEnabled @18: Bool;
+  longOverride @19: Bool;
 
   struct Actuators {
     # range from 0.0 - 1.0
@@ -427,6 +433,12 @@ struct CarControl {
 
       trafficSignGreen @11;
       trafficSignChanged @12;
+      laneChange @13;
+      stopping @14;
+      autoHold @15;
+      engage2 @16;
+      disengage2 @17;
+      
     }
   }
 
