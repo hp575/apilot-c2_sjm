@@ -350,6 +350,10 @@ struct CarControl {
   cruiseControl @4 :CruiseControl;
   hudControl @5 :HUDControl;
   debugTextCC @15 : Text;
+  latEnabled @16: Bool;
+  latOverride @17: Bool;
+  longEnabled @18: Bool;
+  longOverride @19: Bool;
 
   struct Actuators {
     # range from 0.0 - 1.0

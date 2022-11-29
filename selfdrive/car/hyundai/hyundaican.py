@@ -98,17 +98,14 @@ def create_clu11_button(packer, frame, clu11, button, car_fingerprint):
 
 
 def create_lfahda_mfc(packer, CC):
-  enabled = CC.enabled
-  latActive = CC.latActive
-  longActive = CC.longActive
   values = {
-    "LFA_Icon_State": 2 if latActive else 1 if enabled else 0,
-    "HDA_Active": 1 if longActive else 0,
-    "HDA_Icon_State": 2 if longActive else 0,
-    "HDA_VSetReq": longActive, #enabled,
+    "LFA_Icon_State": 3 if CC.latOverride else 2 if CC.latActive else 1 if CC.latEnabled else 0,
+    "HDA_Active": 1 if CC.longActive else 0,
+    "HDA_Icon_State": 2 if CC.longActive else 0,
+    "HDA_VSetReq": CC.longActive, #enabled,
     "HDA_USM" : 2,
-    "HDA_Icon_Wheel" : 1 if longActive else 0,
-    "HDA_Chime" : 1 if longActive else 0,
+    "HDA_Icon_Wheel" : 1 if CC.latActive else 0,
+    "HDA_Chime" : 1 if CC.latActive else 0,
 }
   # VAL_ 1157 LFA_Icon_State 0 "no_wheel" 1 "white_wheel" 2 "green_wheel" 3 "green_wheel_blink";
   # VAL_ 1157 LFA_SysWarning 0 "no_message" 1 "switching_to_hda" 2 "switching_to_scc" 3 "lfa_error" 4 "check_hda" 5 "keep_hands_on_wheel_orange" 6 "keep_hands_on_wheel_red";
@@ -122,7 +119,8 @@ def create_acc_commands_mix_scc(CP, packer, enabled, accel, upper_jerk, idx, hud
   softHold = hud_control.softHold
   long_override = CC.cruiseControl.override
   brakePressed = CS.out.brakePressed
-  longEnabled = enabled and CC.longActive
+  longEnabled = CC.longEnabled
+  longActive = CC.longActive
   radarAlarm = hud_control.radarAlarm
   d = hud_control.objDist
   objGap = 0 if d == 0 else 2 if d < 25 else 3 if d < 40 else 4 if d < 70 else 5 
@@ -130,8 +128,8 @@ def create_acc_commands_mix_scc(CP, packer, enabled, accel, upper_jerk, idx, hud
 
   driverOverride =  CS.out.driverOverride  #1:gas, 2:braking, 0: normal
   if enabled:
-    scc12_accMode = 1 if longEnabled else 0 if brakePressed or CS.out.gasPressed else 2 if long_override else 0 #Brake, Accel, LongActiveUser < 0
-    scc14_accMode = 1 if longEnabled else 4 if brakePressed or CS.out.gasPressed else 2 if long_override else 0 
+    scc12_accMode = 2 if long_override else 0 if brakePressed else 1 if longActive else 0 #Brake, Accel, LongActiveUser < 0
+    scc14_accMode = 2 if long_override else 4 if brakePressed else 1 if longActive else 0
     comfortBandUpper = 0.0
     comfortBandLower = 0.0
     jerkUpperLimit = upper_jerk
@@ -150,9 +148,9 @@ def create_acc_commands_mix_scc(CP, packer, enabled, accel, upper_jerk, idx, hud
     scc11_values = {
     "MainMode_ACC": 1 if enabled else 0 ,
     "TauGapSet": cruiseGap,
-    "VSetDis": set_speed if enabled else 0,
+    "VSetDis": set_speed if longEnabled else 0,
     "AliveCounterACC": idx % 0x10,
-    "SCCInfoDisplay" : 3 if longEnabled and radarAlarm else 4 if longEnabled and softHold else 0 if enabled else 0,   #2: 크루즈 선택, 3: 전방상황주의, 4: 출발준비 <= 주의 2를 선택하면... 선행차아이콘이 안나옴.
+    "SCCInfoDisplay" : 3 if longActive and radarAlarm else 4 if longActive and softHold else 0 if enabled else 0,   #2: 크루즈 선택, 3: 전방상황주의, 4: 출발준비 <= 주의 2를 선택하면... 선행차아이콘이 안나옴.
     "ObjValid": 1 if lead_visible else 0, # close lead makes controls tighter
     "ACC_ObjStatus": 1 if lead_visible else 0, # close lead makes controls tighter
     #"ACC_ObjLatPos": 0,
@@ -164,10 +162,10 @@ def create_acc_commands_mix_scc(CP, packer, enabled, accel, upper_jerk, idx, hud
     values = CS.scc11
     values["MainMode_ACC"] = 1 if enabled else 0 
     values["TauGapSet"] = cruiseGap
-    values["VSetDis"] = set_speed if enabled else 0
+    values["VSetDis"] = set_speed if longEnabled else 0
     values["AliveCounterACC"] = idx % 0x10
     #values["SCCInfoDisplay"] = 4 if longEnabled and softHold else 3 if longEnabled and radarAlarm else 2 if enabled else 0   #3: 전방상황주의, 4: 출발준비
-    values["SCCInfoDisplay"] = 3 if longEnabled and radarAlarm else 4 if longEnabled and softHold else 0 if enabled else 0   #2: 크루즈 선택, 3: 전방상황주의, 4: 출발준비
+    values["SCCInfoDisplay"] = 3 if longActive and radarAlarm else 4 if longActive and softHold else 0 if enabled else 0   #2: 크루즈 선택, 3: 전방상황주의, 4: 출발준비
     values["ObjValid"] = 1 if lead_visible else 0
     values["ACC_ObjStatus"] = 1 if lead_visible else 0
     #values["ACC_ObjLatPos"] = 0

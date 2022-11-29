@@ -823,7 +823,7 @@ void AnnotatedCameraWidget::drawSpeed(QPainter &p) {
   drawText(p, rect().center().x(), 350, str1, 200);
 #endif
   
-  if (width() > 1200) {
+  if (s->show_datetime && width() > 1200) {
       // ajouatom: 현재시간표시
       QTextOption  textOpt = QTextOption(Qt::AlignLeft);
       configFont(p, "Open Sans", 110, "Bold");

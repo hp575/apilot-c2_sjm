@@ -206,7 +206,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"SelectedCar", PERSISTENT},
     {"SoftRestartTriggered", CLEAR_ON_MANAGER_START},
     {"OpkrPrebuiltOn", PERSISTENT},
-    {"ShowDebugUI", PERSISTENT},
+    { "ShowDebugUI", PERSISTENT },
+    { "ShowDateTime", PERSISTENT },
     { "AutoResumeFromGas", PERSISTENT },
     { "AutoResumeFromGasSpeed", PERSISTENT },
     { "AutoResumeFromGasSpeedMode", PERSISTENT },        
@@ -217,6 +218,8 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "AutoResumeFromBrakeRelease", PERSISTENT },
     { "AutoResumeFromBrakeReleaseDist", PERSISTENT },
     { "AutoResumeFromBrakeReleaseLeadCar", PERSISTENT },
+    { "AutoResumeFromBrakeCarSpeed", PERSISTENT },
+    { "AutoResumeFromBrakeReleaseTrafficSign", PERSISTENT },
     { "XEgoObstacleCost", PERSISTENT },
     { "JEgoCost", PERSISTENT },
     { "AChangeCost", PERSISTENT },
@@ -249,12 +252,14 @@ std::unordered_map<std::string, uint32_t> keys = {
     { "LongitudinalTuningKpV", PERSISTENT },
     { "EnableRadarTracks", PERSISTENT },
     { "ApplyDynamicTFollow", PERSISTENT },
+    { "ApplyDynamicTFollowDecel", PERSISTENT },
     { "SccConnectedBus2", PERSISTENT },
     { "TFollowRatio", PERSISTENT },
     { "JerkUpperLowerLimit", PERSISTENT },        
     {"OPKRTimeZone", PERSISTENT},
     { "KeepEngage", PERSISTENT },
     { "UseLanelines", PERSISTENT },
+    { "PathOffset", PERSISTENT },        
 };
 
 } // namespace
