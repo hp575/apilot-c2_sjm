@@ -197,9 +197,6 @@ class Controls:
     self.debugText1 = ""
     self.debugText2 = ""
     self.pcmLongSpeed = 100.0
-    self.latGearShifter = False
-    self.longGearShifter = False
-    self.longOverride = False
     self.cruiseButtonCounter = 0
     self.v_future = 100
     # TODO: no longer necessary, aside from process replay
@@ -627,17 +624,21 @@ class Controls:
     CC = car.CarControl.new_message()
     CC.enabled = self.enabled
     # Check which actuators can be enabled
-    self.latGearShifter = True if CS.gearShifter in [GearShifter.drive,GearShifter.neutral] else False
-    self.longGearShifter = True if CS.gearShifter in [GearShifter.drive] else False
+    CC.latEnabled = True if self.active and CS.gearShifter in [GearShifter.drive,GearShifter.neutral] else False
+    CC.longEnabled = True if self.active and CS.gearShifter in [GearShifter.drive] else False
     CC.latActive = self.active and not CS.steerFaultTemporary and not CS.steerFaultPermanent and \
-                   CS.vEgo > self.CP.minSteerSpeed and not CS.standstill and self.latGearShifter
+                   CS.vEgo > self.CP.minSteerSpeed and not CS.standstill and CC.latEnabled
     #CC.longActive = self.active and not self.events.any(ET.OVERRIDE_LONGITUDINAL) and self.CP.openpilotLongitudinalControl
-    override = self.events.any(ET.OVERRIDE_LONGITUDINAL)
-    longActive1 = self.active and not override and self.longGearShifter
-    if not self.longGearShifter:
+    CC.latOverride = CC.latActive and self.events.any(ET.OVERRIDE_LATERAL)
+    longOverrideFlag = self.events.any(ET.OVERRIDE_LONGITUDINAL)
+    longActiveUser = self.cruise_helper.longActiveUser
+    longActiveEnabled = CC.longEnabled and longActiveUser > 0 #롱컨 레디~
+
+    CC.longActive = longActiveEnabled and not longOverrideFlag
+    CC.longOverride = longActiveEnabled and longOverrideFlag
+
+    if not CC.longEnabled:
       self.cruise_helper.longActiveUser = 0
-    CC.longActive = longActive1 and self.cruise_helper.longActiveUser>0
-    self.longOverride = not longActive1 and override
 
     hudControl = CC.hudControl
     xState = self.sm['longitudinalPlan'].xState
@@ -740,7 +741,7 @@ class Controls:
     if len(angular_rate_value) > 2:
       CC.angularVelocity = angular_rate_value
 
-    CC.cruiseControl.override = self.enabled and self.longOverride #not CC.longActive and self.CP.openpilotLongitudinalControl
+    CC.cruiseControl.override = self.enabled and CC.longOverride #not CC.longActive and self.CP.openpilotLongitudinalControl
     CC.cruiseControl.cancel = CS.cruiseState.enabled and (not self.enabled or not self.CP.pcmCruise)
     if self.joystick_mode and self.sm.rcv_frame['testJoystick'] > 0 and self.sm['testJoystick'].buttons[0]:
       CC.cruiseControl.cancel = True

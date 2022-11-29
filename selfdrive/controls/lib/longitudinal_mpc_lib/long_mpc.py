@@ -233,6 +233,7 @@ class LongitudinalMpc:
     self.trafficStopModelSpeed = True
     self.e2eDecelSpeed = 0
     self.applyDynamicTFollow = 1.0
+    self.applyDynamicTFollowDecel = 1.0
     self.tFollowRatio = 1.0
     self.stopDistance = STOP_DISTANCE
     self.softHoldTimer = 0
@@ -405,6 +406,7 @@ class LongitudinalMpc:
       self.stopDistance = float(int(Params().get("StopDistance", encoding="utf8"))) / 100.
       self.e2eDecelSpeed = float(int(Params().get("E2eDecelSpeed", encoding="utf8")))
       self.applyDynamicTFollow = float(int(Params().get("ApplyDynamicTFollow", encoding="utf8"))) / 100.
+      self.applyDynamicTFollowDecel = float(int(Params().get("ApplyDynamicTFollowDecel", encoding="utf8"))) / 100.
       self.tFollowRatio = float(int(Params().get("TFollowRatio", encoding="utf8"))) / 100.     
 
     self.trafficState = 0
@@ -424,7 +426,7 @@ class LongitudinalMpc:
     aRel = 0.
     if radarstate.leadOne.status:
       self.t_follow *= interp(radarstate.leadOne.vRel*3.6, [-100., 0, 100.], [self.applyDynamicTFollow, 1.0, 2.0 - self.applyDynamicTFollow])
-      self.t_follow *= interp(self.prev_a[0], [-4, 0], [self.applyDynamicTFollow, 1.0])
+      self.t_follow *= interp(self.prev_a[0], [-4, 0], [self.applyDynamicTFollowDecel, 1.0])
       if self.vRel_prev < 1000:
         aRel = self.filter_aRel.update((self.vRel_prev - radarstate.leadOne.vRel) / DT_MDL)
         #self.t_follow *= interp(aRel, [-1., 0, 4.], [self.applyDynamicTFollow, 1.0, 2.0 - self.applyDynamicTFollow])
