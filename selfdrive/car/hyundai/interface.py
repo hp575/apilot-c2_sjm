@@ -254,6 +254,18 @@ class CarInterface(CarInterfaceBase):
       ret.wheelbase = 2.855
       ret.steerRatio = 15.5
       tire_stiffness_factor = 0.7
+    elif candidate == CAR.GENESIS_EQ900:
+      ret.mass = 2200
+      ret.wheelbase = 3.15
+      ret.steerRatio = 16.0
+      ret.steerActuatorDelay = 0.075
+    elif candidate == CAR.GENESIS_EQ900_L:
+      ret.mass = 2290
+      ret.wheelbase = 3.45
+    elif candidate == CAR.GENESIS_G90_2019:
+      ret.mass = 2150
+      ret.wheelbase = 3.16
+      
 
     # *** longitudinal control ***
     if candidate in CANFD_CAR:
