@@ -45,6 +45,7 @@ def manager_init() -> None:
     ("LanguageSetting", "main_en"),
     ("OpenpilotEnabledToggle", "1"),
     ("ShowDebugUI", "1"),
+    ("OPKRServer", "0"),
     ("ShowDateTime", "1"),
     ("AutoResumeFromGas", "1"),
     ("AutoResumeFromGasSpeed", "30"),
